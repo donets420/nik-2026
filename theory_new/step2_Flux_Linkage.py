@@ -161,5 +161,6 @@ t_vals = np.linspace(0, 1.0, 101)
 t_arr, psi_arr = flux_linkage_vs_time(tbl, z_center, L_coil, R_coil, n_density,
                                       t_vals, z_mag, z_mag_range=z_mag_range)
 # Plot
-plt.plot(t_arr, psi_arr)
-plt.show()
+if __name__ == "__main__":
+    plt.plot(t_arr, psi_arr)
+    plt.show()
