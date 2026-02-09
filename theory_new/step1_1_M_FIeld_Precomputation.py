@@ -128,6 +128,12 @@ class MagnetFieldTable:
         self.Br = d["Br"]
         self.Bz = d["Bz"]
 
+        # Grid bounds for validation (avoid silent extrapolation)
+        self.rho_min = float(np.min(self.rho))
+        self.rho_max = float(np.max(self.rho))
+        self.z_min = float(np.min(self.z))
+        self.z_max = float(np.max(self.z))
+
         self._Br = RegularGridInterpolator((self.z, self.rho), self.Br,
                                            method=method, bounds_error=bounds_error, fill_value=fill_value)
         self._Bz = RegularGridInterpolator((self.z, self.rho), self.Bz,
@@ -176,6 +182,10 @@ class MagnetFieldTable:
         if out_shape == ():
             return float(Bx), float(By), float(Bz)
         return Bx, By, Bz
+
+    def Bz_cyl(self, rho, z):
+        """Convenience: return only axial component Bz(rho, z)."""
+        return self.B_rz(rho, z)[1]
 
 #----------- 5) 2D plot --------------------------------
 
