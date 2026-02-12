@@ -8,7 +8,7 @@ filename = magnet["filename"]
 tbl = MagnetFieldTable(filename, method="linear", bounds_error=False, fill_value=0.0)
 
 # Circuit
-R_total = 5.0      # Ohm (coil + load)
+R_total = 5.0      # 5hm (coil + load)
 L_self  = 20e-3    # 20 mH
 
 # Magnet motion: sinusoidal

@@ -5,13 +5,14 @@ import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 
 MU0 = 4.0 * np.pi * 1e-7  # [T·m/A]
-mu = 3.0            # dipole moment
 
 # Magnit parameters
 length = 0.10
 diameter = 0.02
 
-# Grid parameters
+mu = 3.0          # dipole moment
+
+# Grid parameters for magnet
 rho_max = 0.1     
 Nrho = 1000        # step size in rho
 zmax = 0.3         # grid size in z
@@ -24,16 +25,22 @@ R_coil   = 0.015    # coil's radius
 N_turns = 1000      # turn amount
 n_density = N_turns / L_coil  # [turns/m]
 
+# Grid parameters for coil
+rho_grid = np.linspace(0, 0.025, 400)
+z_grid = np.linspace(-0.15, 0.15, 400)
+Nz_coil = 700
+wire_eps = 1e-9
+
 # Create magent, grid, coil dicts
 magnet = {
     "length": length,
     "diameter": diameter,
     "radius": diameter / 2,    # it was a
     "half_length": length / 2,  # it was b
-    "filename": f"magnet_field_L{str(length*100)}cm_D{str(diameter*100)}cm_mu3.npz"
+    "filename": f"magnet_field_L{str(int(length*100))}cm_D{str(int(diameter*100))}cm_mu{str(int(mu))}.npz"
 }
 
-grid = {
+grid_magnet = {
     "rho_max": rho_max,
     "Nrho": Nrho,
     "zmax": zmax,
@@ -42,14 +49,21 @@ grid = {
 
 coil = {
     "z_center": z_center,
-    "L_coil": L_coil,
-    "R_coil": R_coil,
-    "N_turns": N_turns,
+    "L_coil": L_coil, # it was 2*b
+    "R_coil": R_coil, # it was a
+    "N_turns": N_turns, 
     "n_density": n_density,
     "filename": f"coil_kernel.npz" # Do we need it for 4_1?
 }
 
-# ---------- 1) Robust Elliptic Integral (Crash-Proof) ----------
+grid_coil = {
+    "rho_grid": rho_grid, 
+    "z_grid": z_grid,
+    "Nz_coil": Nz_coil, 
+    "wire_eps": wire_eps
+}
+
+
 def cel(kc, p, c, s):
     """
     Generalized complete elliptic integral with singularity handling.
@@ -77,7 +91,6 @@ def cel(kc, p, c, s):
         result[singular_mask] = np.nan
     return result
 
-# ---------- 2) Physics Model (Unchanged) ----------
 def B_cylindrical_permanent_magnet(rho, z, a, b, *, M=None, nI=None, mu=None, axis_tol=1e-12):
     """
     Calculate the magnetic field of a cylindrical permanent magnet.
@@ -132,7 +145,6 @@ def B_cylindrical_permanent_magnet(rho, z, a, b, *, M=None, nI=None, mu=None, ax
 
     return Brho, Bz
 
-# ---------- 3) Safer Grid Generation ----------
 def precompute_field_table_uniform(filename, a, b, *, mu=None, M=None, nI=None,
                                    rho_max=0.10, Nrho=1000,
                                    zmax=0.30, Nz=1000):
@@ -169,7 +181,6 @@ def precompute_field_table_uniform(filename, a, b, *, mu=None, M=None, nI=None,
                         a=a, b=b, mu=mu if mu is not None else np.nan)
     print(f"Saved to {filename}.")
 
-# ---------- 4) Robust 3D Lookup ----------
 class MagnetFieldTable:
     def __init__(self, npz_file, method="linear", bounds_error=False, fill_value=0.0):      
         # NOTE: bounds_error=False is much safer for simulations
@@ -237,8 +248,6 @@ class MagnetFieldTable:
     def Bz_cyl(self, rho, z):
         """Convenience: return only axial component Bz(rho, z)."""
         return self.B_rz(rho, z)[1]
-
-#----------- 5) 2D plot --------------------------------
 
 def plot_streamlines_xz(tbl, xlim=0.10, zlim=0.30, nx=1000, nz=1000, density=2.0):
     x = np.linspace(-xlim, xlim, nx)
@@ -555,7 +564,6 @@ def BrBz_loop_carlson(rho, z, a, I, axis_tol=1e-12):
         Bz[off] = Bz_off
 
     return Br, Bz
-
 
 def precompute_coil_kernel_npz(
     out_npz: str,

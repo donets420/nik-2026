@@ -8,11 +8,11 @@ from matplotlib.patches import Rectangle
 from scipy.interpolate import interp1d
 
 from gypt02 import MagnetFieldTable, CoilKernelField, induced_current_vs_time
-from gypt02 import MU0, magnet
+from gypt02 import MU0, magnet, coil
 
 # -------------------- Load data --------------------
 filename_mag = magnet["filename"]
-filename_kernel = "coil_kernel.npz"
+filename_kernel = coil["filename"]
 
 assert Path(filename_mag).exists(), f"Missing: {filename_mag}"
 assert Path(filename_kernel).exists(), f"Missing: {filename_kernel}"

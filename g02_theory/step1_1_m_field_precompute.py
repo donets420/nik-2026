@@ -1,5 +1,5 @@
 from gypt02 import precompute_field_table_uniform, MagnetFieldTable, plot_streamlines_xz
-from gypt02 import magnet, mu, grid
+from gypt02 import magnet, mu, grid_magnet
 
 # Precompute field table over your region (rho<=10 cm, |z|<=30 cm)
 
@@ -9,8 +9,8 @@ filename = magnet["filename"]
 precompute_field_table_uniform(
     filename,
     a=magnet["radius"], b=magnet["half_length"], mu=mu,
-    rho_max=grid["rho_max"], Nrho=grid["Nrho"],
-    zmax=grid["zmax"], Nz=grid["Nz"]
+    rho_max=grid_magnet["rho_max"], Nrho=grid_magnet["Nrho"],
+    zmax=grid_magnet["zmax"], Nz=grid_magnet["Nz"]
 )
 
 # Load the file
